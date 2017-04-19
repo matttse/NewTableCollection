@@ -30,12 +30,37 @@ public class NewTable<K, E> {
 	}
 	
 	/*
+	 * @Name: containsKey
+	 * 
+	 * @Function/Purpose: determine whether a specified key is in this table
+	 * 
+	 * @Parameters:
+	 * 		{K} the non-null key to use
+	 * 
+	 * @Pre- key cannot be null
+	 * 
+	 * @Returns-
+	 * true: if the table contains an object with the specified key
+	 * false: otherwise.
+	 * @Additional Comments:
+	 * key.equals() is used to compare the key to the keys that are in the table 
+	 * 
+	 * @Throws- NullPointerException
+	 * Indicates that key is null
+	 * 
+	 */
+	public boolean containsKey(K key) {
+		return (findIndex(key) != -1);
+	}
+	
+	
+	/*
 	 * @Name: remove
 	 * 
 	 * @Function/Purpose: removes an object with a specified key
 	 * 
 	 * @Parameters:
-	 * 		{K} the non-null key to use for the new element
+	 * 		{K} the non-null key to use
 	 * 
 	 * @Pre- key cannot be null
 	 * 
@@ -144,7 +169,7 @@ public class NewTable<K, E> {
 	 * @Function/Purpose: retrieve an object for a specified key
 	 * 
 	 * @Parameters:
-	 * 		{K} the non-null key to use for the new element
+	 * 		{K} the non-null key to use
 	 * 
 	 * @Pre- key cannot be null
 	 * 

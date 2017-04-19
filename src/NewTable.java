@@ -18,6 +18,7 @@ public class NewTable<K, E> {
 	private Object[] data;
 	private boolean[] hasBeenUsed;
 	private Object[] keys;
+	private int manyItems;
 	
 	public NewTable(int capacity) {
 		if (capacity <= 0) {
@@ -26,6 +27,41 @@ public class NewTable<K, E> {
 		keys = new Object[capacity];
 		data = new Object[capacity];
 		hasBeenUsed = new boolean[capacity];
+	}
+	
+	/*
+	 * @Name: remove
+	 * 
+	 * @Function/Purpose: removes an object with a specified key
+	 * 
+	 * @Parameters:
+	 * 		{K} the non-null key to use for the new element
+	 * 
+	 * @Pre- key cannot be null
+	 * 
+	 * @Post- if an object was found with the specified key, then that object has been
+	 * removed and a copy of the removed object is return; otherwise, this
+	 * table is unchanged and the null reference is returned. Note that 
+	 * key.equals() is used to compare the key to the keys that are in this table 
+	 * 
+	 * @Throws- NullPointerException
+	 * Indicates that key is null
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public E remove(K key) {
+		int index = findIndex(key);
+		E answer = null;
+		
+		if (index != -1) {
+			answer = (E) data[index];
+			keys[index] = null;
+			data[index] = null;
+			manyItems--;
+		}
+		
+		return answer;
+		
 	}
 	
 	/*
@@ -50,6 +86,7 @@ public class NewTable<K, E> {
 	 * Indicates that key or element is null
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	public E put(K key, E element) {
 		
 		if (key == null || element == null) {//setup throw

@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Vector;
@@ -18,16 +19,64 @@ public class NewTable<K, E> {
 	private Object[] data;
 	private boolean[] hasBeenUsed;
 	private Object[] keys;
-	private int manyItems;
+	private int size, maxSize;
+	
+	
 	
 	public NewTable(int capacity) {
 		if (capacity <= 0) {
 			throw new IllegalArgumentException("Capacity is negative. ");
 		}
+		size = 0;
 		keys = new Object[capacity];
 		data = new Object[capacity];
 		hasBeenUsed = new boolean[capacity];
+		maxSize = capacity;
 	}
+	
+	/*
+	 * @Name: size
+	 * 
+	 * @Function/Purpose: returns number of elements currently in the table
+	 * 
+	 * @Returns-
+	 * number of keys in table
+	 * 
+	 * @Throws- NullPointerException
+	 * Indicates that key is null
+	 * 
+	 */
+	public int size() {
+		int count = 0;
+		
+		count = keys.length;
+		
+		return count;
+		
+	}
+
+	/*
+	 * @Name: clear
+	 * 
+	 * @Function/Purpose: removes all of the mappings from this map
+
+	 * 
+	 * @Post-
+	 * The map will be empty after this call returns
+	 * 
+	 * @Throws- UnsupportedOperationException
+	 * if the clear operation is not supported by this map
+	 * 
+	 */
+    public void clear() {
+    	size = 0;
+		keys = new Object[maxSize];
+		data = new Object[maxSize];
+		hasBeenUsed = new boolean[maxSize];
+
+    }
+    
+    
 	
 	/*
 	 * @Name: containsKey
@@ -82,7 +131,7 @@ public class NewTable<K, E> {
 			answer = (E) data[index];
 			keys[index] = null;
 			data[index] = null;
-			manyItems--;
+			size--;
 		}
 		
 		return answer;

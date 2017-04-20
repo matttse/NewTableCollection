@@ -1,6 +1,7 @@
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Scanner;
 import java.util.Vector;
 
 /**
@@ -286,8 +287,58 @@ public class NewTable<K, E> {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	public static void main(String[] args) {	
+		
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Table Test\n\n");
+        System.out.println("Enter size");
+        NewTable<String, Integer> nt = new NewTable<String, Integer>(scan.nextInt());
+        
+        char ch;
+        
+        do    
+        {
+            System.out.println("\nTable Operations\n");
+            System.out.println("1. insert ");
+            System.out.println("2. remove");
+            System.out.println("3. get");            
+            System.out.println("4. clear");
+            System.out.println("5. size");
+ 
+            int choice = scan.nextInt();            
+            switch (choice)
+            {
+            case 1 : 
+                System.out.println("Enter key and value");
+                String K = scan.next();
+                Integer E = scan.nextInt();
+                nt.put(K, E); 
+                break;                          
+            case 2 :                 
+                System.out.println("Enter key");
+                nt.remove( scan.next() ); 
+                break;                        
+            case 3 : 
+                System.out.println("Enter key");
+                System.out.println("Value = "+ nt.get( scan.next() )); 
+                break;                                   
+            case 4 : 
+                nt.clear();
+                System.out.println("Hash Table Cleared\n");
+                break;
+            case 5 : 
+                System.out.println("Size = "+ nt.size() );
+                break;         
+            default : 
+                System.out.println("Wrong Entry \n ");
+                break;   
+            }
+            /** Display hash table **/  
+ 
+            System.out.println("\nDo you want to continue (Type y or n) \n");
+            ch = scan.next().charAt(0);                        
+        } while (ch == 'Y'|| ch == 'y');  
+        
 
 	}
 

@@ -1,3 +1,4 @@
+import java.nio.channels.IllegalSelectorException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -20,15 +21,15 @@ public class NewTable<K, E> {
 	private Object[] data;
 	private boolean[] hasBeenUsed;
 	private Object[] keys;
-	private int size, maxSize;
+	private int maxSize, manyItems;
 	
 	
 	
 	public NewTable(int capacity) {
-		if (capacity <= 0) {
-			throw new IllegalArgumentException("Capacity is negative. ");
+		if (capacity < 0) {
+			throw new IllegalArgumentException("Capacity is not greater than 0. ");
 		}
-		size = 0;
+		manyItems = 0;
 		keys = new Object[capacity];
 		data = new Object[capacity];
 		hasBeenUsed = new boolean[capacity];
@@ -70,7 +71,7 @@ public class NewTable<K, E> {
 	 * 
 	 */
     public void clear() {
-    	size = 0;
+    	manyItems = 0;
 		keys = new Object[maxSize];
 		data = new Object[maxSize];
 		hasBeenUsed = new boolean[maxSize];
@@ -132,7 +133,7 @@ public class NewTable<K, E> {
 			answer = (E) data[index];
 			keys[index] = null;
 			data[index] = null;
-			size--;
+			manyItems--;
 		}
 		
 		return answer;
@@ -164,36 +165,30 @@ public class NewTable<K, E> {
 	@SuppressWarnings("unchecked")
 	public E put(K key, E element) {
 		
-		if (key == null || element == null) {//setup throw
-			throw new NullPointerException("key or element is null");
-		}
-		//set up listiterator that can step through the one linked list that might
-		//already have an elenent with the given key
-		int i = hash(key);
-		LinkedList<HashPair<K,E>> oneList = table.get(i);
-		ListIterator<HashPair<K,E>> cursor = oneList.listIterator(0);
+		int index = findIndex(key);
 		
-		//Two other variables for the new HashPair (if needed) and the return value:
-		HashPair<K,E> pair;
 		E answer;
 		
-		//step through the one linked list using the iterator
-		while (cursor.hasNext()) {
-			pair = cursor.next();
-			if (pair.key.equals(key)) {//check given key already in list
-				answer = pair.Element;
-				pair.Element = element;
-				return answer;
-			}
+		if (index != -1) {
+			//the key is already in the table
+			answer = (E) data[index];
+			data[index] = element;
+			return answer;
+		} else if (manyItems < data.length) {
+			//the key is not yet in this table
+			index = hash(key);
+			while (keys[index] != null)
+				index = nextIndex(index);
+			keys[index] = key;
+			data[index] = element;
+			hasBeenUsed[index] = true;
+			manyItems++;
+			return null;
+		} else {
+			//table is full
+			throw new IllegalStateException("Table is full. ");
 		}
-		
-		//specified key was not on oneList, create newnode for the new entry
-		pair = new HashPair<K,E>();
-		pair.key = key;
-		pair.Element = element;
-		oneList.add(pair);
-		
-		return null;		
+				
 	}
 	
 	/*
@@ -299,7 +294,7 @@ public class NewTable<K, E> {
         do    
         {
             System.out.println("\nTable Operations\n");
-            System.out.println("1. insert ");
+            System.out.println("1. put ");
             System.out.println("2. remove");
             System.out.println("3. get");            
             System.out.println("4. clear");

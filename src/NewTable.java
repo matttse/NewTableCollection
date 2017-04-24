@@ -1,5 +1,5 @@
-import java.nio.channels.IllegalSelectorException;
-import java.util.Arrays;
+
+
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Scanner;
@@ -17,23 +17,25 @@ import java.util.Vector;
  */
 public class NewTable<K, E> {
 
-	private Vector< LinkedList< HashPair<K,E> > > table;
+	private Vector<LinkedList< HashPair<K,E> > > table;	
 	private Object[] data;
-	private boolean[] hasBeenUsed;
 	private Object[] keys;
-	private int maxSize, manyItems;
-	
-	
+	private int manyItems;
 	
 	public NewTable(int capacity) {
 		if (capacity < 0) {
 			throw new IllegalArgumentException("Capacity is not greater than 0. ");
 		}
+		table = new Vector<LinkedList< HashPair<K,E> > >(capacity);
+		LinkedList<HashPair<K, E>> list = new LinkedList<HashPair<K, E>>();
 		manyItems = 0;
 		keys = new Object[capacity];
 		data = new Object[capacity];
-		hasBeenUsed = new boolean[capacity];
-		maxSize = capacity;
+		for (int i = 0; i < capacity; i++) {
+			System.out.print(list);
+			System.out.print(i);
+			table.add(list);
+		}
 	}
 	
 	/*
@@ -50,9 +52,11 @@ public class NewTable<K, E> {
 	 */
 	public int size() {
 		int count = 0;
-		
-		count = keys.length;
-		
+		for (int i = 0; i < table.capacity(); i++) {
+			if (table.get(i) != null) {
+				count++;
+			}
+		}
 		return count;
 		
 	}
@@ -72,14 +76,14 @@ public class NewTable<K, E> {
 	 */
     public void clear() {
     	manyItems = 0;
-		keys = new Object[maxSize];
-		data = new Object[maxSize];
-		hasBeenUsed = new boolean[maxSize];
+    	for (int i = 0; i < data.length; i++) {
+			keys[i] = null;
+			data[i] = null;
+		}
+    	table.clear();
 
     }
     
-    
-	
 	/*
 	 * @Name: containsKey
 	 * 
@@ -101,9 +105,8 @@ public class NewTable<K, E> {
 	 * 
 	 */
 	public boolean containsKey(K key) {
-		return (findIndex(key) != -1);
-	}
-	
+		return (hash(key) != -1);
+	}	
 	
 	/*
 	 * @Name: remove
@@ -124,19 +127,29 @@ public class NewTable<K, E> {
 	 * Indicates that key is null
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
 	public E remove(K key) {
-		int index = findIndex(key);
-		E answer = null;
-		
-		if (index != -1) {
-			answer = (E) data[index];
-			keys[index] = null;
-			data[index] = null;
-			manyItems--;
-		}
-		
-		return answer;
+        int index = hash(key);
+        
+        if (index != -1) {
+    		//the key is not already in the table
+    		//setup a listiterator that can step through the one linkedlist that might
+    		//already have an element with the given key
+    		LinkedList<HashPair<K, E>> oneList = table.get(index);	
+    		ListIterator<HashPair<K,E>> cursor = oneList.listIterator(0);
+    		//two variables for the new hashpair
+    		HashPair<K,E> pair;
+    		while (cursor.hasNext()) {//step through the one linked list using the iterator
+    			pair = cursor.next();
+    			if (pair.key.equals(key)) {//check given key already in list
+    				cursor.remove();
+    				manyItems--;
+    				keys[index] = null;
+    				data[index] = null;
+    			}
+    		}
+        }
+        System.out.println("not found");
+		return null;
 		
 	}
 	
@@ -162,32 +175,37 @@ public class NewTable<K, E> {
 	 * Indicates that key or element is null
 	 * 
 	 */
-	@SuppressWarnings("unchecked")
 	public E put(K key, E element) {
-		
-		int index = findIndex(key);
-		
-		E answer;
-		
-		if (index != -1) {
-			//the key is already in the table
-			answer = (E) data[index];
-			data[index] = element;
-			return answer;
-		} else if (manyItems < data.length) {
-			//the key is not yet in this table
-			index = hash(key);
-			while (keys[index] != null)
-				index = nextIndex(index);
-			keys[index] = key;
-			data[index] = element;
-			hasBeenUsed[index] = true;
-			manyItems++;
-			return null;
-		} else {
-			//table is full
-			throw new IllegalStateException("Table is full. ");
+		if (key == null || element == null) {
+			throw new NullPointerException("key or element is null");
 		}
+		int index = hash(key);
+		//the key is not already in the table
+		//setup a listiterator that can step through the one linkedlist that might
+		//already have an element with the given key
+		LinkedList<HashPair<K, E>> oneList = table.get(index);	
+		ListIterator<HashPair<K,E>> cursor = oneList.listIterator(0);
+		//two variables for the new hashpair
+		HashPair<K,E> pair;
+		E answer = null;
+		while (cursor.hasNext()) {//step through the one linked list using the iterator
+			pair = cursor.next();
+			if (pair.key.equals(key)) {//check given key already in list
+				answer = pair.element;
+				pair.element = element;
+				manyItems++;
+				keys[index] = key;
+				data[index] = element;
+				return answer;
+			}
+		}
+		//the specified key was not on oneList, so create a new node for the new entry
+		pair = new HashPair<K,E>();
+		pair.key = key;
+		pair.element = element;
+		oneList.add(pair);
+		
+		return answer;
 				
 	}
 	
@@ -205,7 +223,7 @@ public class NewTable<K, E> {
 	 * 
 	 */
 	private int hash(K key) {
-		return Math.abs(key.hashCode()) % data.length;
+		return Math.abs(key.hashCode()) % table.size();
 	}
 	
 	/*
@@ -223,61 +241,28 @@ public class NewTable<K, E> {
 	 * 
 	 */
     public E get(K key) {
-        int index = findIndex(key);
+        int index = hash(key);
         
-        if (index == -1) {
-        	return null;
-        } else {
-        	return (E) data[index];
+        if (index != -1) {
+    		//the key is not already in the table
+    		//setup a listiterator that can step through the one linkedlist that might
+    		//already have an element with the given key
+    		LinkedList<HashPair<K, E>> oneList = table.get(index);	
+    		ListIterator<HashPair<K,E>> cursor = oneList.listIterator(0);
+    		//two variables for the new hashpair
+    		HashPair<K,E> pair;
+    		E answer = null;
+    		while (cursor.hasNext()) {//step through the one linked list using the iterator
+    			pair = cursor.next();
+    			if (pair.key.equals(key)) {//check given key already in list
+    				answer = pair.element;
+    				return answer;
+    			}
+    		}
         }
+		return null;
     }
 
-	/*
-	 * @Name: findIndex
-	 * 
-	 * @Parameters:
-	 * 		{K} the non-null key to use for the new element
-	 * 
-	 * @Post- if the specified key is found in the table, then the return
-	 * value is the index of the specified key. otherwise, return value is -1
-	 * 
-	 */
-	private int findIndex(K key) {
-		int count = 0;
-		int i = hash(key);
-		
-		while ((count < data.length) && (hasBeenUsed[i])) {
-			if (key.equals(keys[i])) {
-				return i;
-			}
-			count++;
-			i = nextIndex(i);
-		}
-		
-		
-		
-		return -1;
-	}
-
-	/*
-	 * @Name: nextIndex
-	 * 
-	 * @Function/Purpose: the return value is normally i+1
-	 * 
-	 * @Parameters:
-	 * 		{int} i
-	 * 
-	 * @Additional comments:
-	 * if i+1 is the data.length, return value 0
-	 * 
-	 */
-	private int nextIndex(int i) {
-		if (i+1 == data.length) {
-			return 0;
-		} else {
-			return i+1;
-		}
-	}
 
 	/**
 	 * @param args
@@ -297,8 +282,9 @@ public class NewTable<K, E> {
             System.out.println("1. put ");
             System.out.println("2. remove");
             System.out.println("3. get");            
-            System.out.println("4. clear");
-            System.out.println("5. size");
+            System.out.println("4. contains key");
+            System.out.println("5. clear");
+            System.out.println("6. size");
  
             int choice = scan.nextInt();            
             switch (choice)
@@ -316,12 +302,17 @@ public class NewTable<K, E> {
             case 3 : 
                 System.out.println("Enter key");
                 System.out.println("Value = "+ nt.get( scan.next() )); 
-                break;                                   
+                break;   
             case 4 : 
-                nt.clear();
-                System.out.println("Hash Table Cleared\n");
+                System.out.println("Enter key");
+                System.out.println("Value = "+ nt.containsKey( scan.next() )); 
                 break;
             case 5 : 
+                nt.clear();
+                System.out.println("Hash Table Cleared\n");
+                System.exit(0);
+                break;
+            case 6 : 
                 System.out.println("Size = "+ nt.size() );
                 break;         
             default : 
@@ -341,5 +332,5 @@ public class NewTable<K, E> {
 
 class HashPair<K, E> {
 	K key;
-	E Element;
+	E element;
 }

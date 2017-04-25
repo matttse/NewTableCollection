@@ -18,6 +18,7 @@ import java.util.Vector;
 public class NewTable<K, E> {
 
 	private Vector<LinkedList< HashPair<K,E> > > table;	
+	//additional local tracking variables
 	private Object[] data;
 	private Object[] keys;
 	private int manyItems;
@@ -31,6 +32,7 @@ public class NewTable<K, E> {
 		manyItems = 0;
 		keys = new Object[capacity];
 		data = new Object[capacity];
+		//initialize the list
 		for (int i = 0; i < capacity; i++) {
 			System.out.print(list);
 			System.out.print(i);

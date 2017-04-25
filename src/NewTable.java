@@ -78,7 +78,7 @@ public class NewTable<K, E> {
 	 */
     public void clear() {
     	manyItems = 0;
-    	for (int i = 0; i < data.length; i++) {
+    	for (int i = 0; i < keys.length; i++) {
 			keys[i] = null;
 			data[i] = null;
 		}
@@ -147,6 +147,7 @@ public class NewTable<K, E> {
     				manyItems--;
     				keys[index] = null;
     				data[index] = null;
+    				return null;
     			}
     		}
         }
@@ -321,7 +322,7 @@ public class NewTable<K, E> {
                 System.out.println("Wrong Entry \n ");
                 break;   
             }
-            /** Display hash table **/  
+             
  
             System.out.println("\nDo you want to continue (Type y or n) \n");
             ch = scan.next().charAt(0);                        

@@ -218,7 +218,7 @@ public class NewTable<K, E> {
 	 * @Function/Purpose: the return value is a valid index of the table's array
 	 * 
 	 * @Parameters:
-	 * 		{Object} key
+	 * 		{K} key
 	 * 
 	 * @Additional Comments:
 	 * The index is calculated as the remainder when the absolute value of the key's
